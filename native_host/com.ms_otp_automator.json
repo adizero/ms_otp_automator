@@ -1,0 +1,9 @@
+{
+  "name": "com.ms_otp_automator",
+  "description": "Native messaging host for MS OTP Automator",
+  "path": "/PLACEHOLDER/native_host/ms_otp_host.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://EXTENSION_ID_HERE/"
+  ]
+}

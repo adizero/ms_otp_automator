@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "MS OTP Automator",
+  "version": "1.0",
+  "description": "Automatically fills Microsoft MFA TOTP codes using oathtool",
+  "permissions": [
+    "nativeMessaging",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://login.microsoftonline.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "MS OTP Automator"
+  }
+}
