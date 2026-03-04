@@ -34,6 +34,20 @@ input[type="text"] {
   cursor: pointer;
 }
 
+.sub-option {
+  margin-top: 4px;
+  padding-left: 22px;
+}
+
+.sub-option label {
+  font-size: 12px;
+  color: #555;
+}
+
+.sub-option input[type="text"] {
+  margin-top: 2px;
+}
+
 .buttons {
   margin-top: 8px;
   display: flex;

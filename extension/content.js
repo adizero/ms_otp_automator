@@ -9,6 +9,7 @@
 
   let otpHandled = false;
   let skipHandled = false;
+  let accountPickerHandled = false;
 
   function fillOtpCode(code) {
     const input = document.getElementById(OTP_INPUT_ID);
@@ -85,6 +86,57 @@
     });
   }
 
+  function handleAccountPicker() {
+    if (accountPickerHandled) return;
+    accountPickerHandled = true;
+
+    chrome.storage.local.get(
+      ["autoSelectAccount", "autoSelectAccountName"],
+      (data) => {
+        if (data.autoSelectAccount === false) {
+          accountPickerHandled = false;
+          return;
+        }
+
+        const tiles = document.querySelectorAll(
+          '#tilesHolder .table[role="button"][data-test-id]' +
+            ":not(#otherTile .table)"
+        );
+        if (tiles.length === 0) {
+          accountPickerHandled = false;
+          return;
+        }
+
+        const name = (data.autoSelectAccountName || "").trim();
+        if (!name) {
+          tiles[0].click();
+          return;
+        }
+
+        let match = null;
+        try {
+          const re = new RegExp(name, "i");
+          match = Array.from(tiles).find((t) =>
+            re.test(t.getAttribute("data-test-id"))
+          );
+        } catch (_) {
+          // invalid regex, fall through to substring
+        }
+        if (!match) {
+          const lower = name.toLowerCase();
+          match = Array.from(tiles).find((t) =>
+            t.getAttribute("data-test-id").toLowerCase().includes(lower)
+          );
+        }
+        if (match) {
+          match.click();
+        } else {
+          accountPickerHandled = false;
+        }
+      }
+    );
+  }
+
   function checkPage() {
     const otpInput = document.getElementById(OTP_INPUT_ID);
     if (otpInput && otpInput.offsetParent !== null) {
@@ -99,6 +151,14 @@
     }
 
     const meta = document.querySelector('meta[name="PageID"]');
+    if (meta && meta.content === "ConvergedSignIn") {
+      const tilesHolder = document.getElementById("tilesHolder");
+      if (tilesHolder && tilesHolder.offsetParent !== null) {
+        handleAccountPicker();
+        return;
+      }
+    }
+
     if (meta && meta.content === "ConvergedProofUpRedirect") {
       const link = document.getElementById(SKIP_LINK_ID);
       if (link) handleSkipPrompt(link);
@@ -116,7 +176,7 @@
   // become visible via a style change, which childList observers miss.
   const poll = setInterval(() => {
     checkPage();
-    if (otpHandled || skipHandled) clearInterval(poll);
+    if (otpHandled || skipHandled || accountPickerHandled) clearInterval(poll);
   }, 1000);
 
   checkPage();

@@ -11,6 +11,13 @@
   <div class="option">
     <label><input type="checkbox" id="skipMfa" checked> Skip MFA registration prompt</label>
   </div>
+  <div class="option">
+    <label><input type="checkbox" id="autoSelect" checked> Auto-select account</label>
+  </div>
+  <div class="sub-option" id="accountNameGroup">
+    <label for="accountName">Account name (regex/substring, empty = first):</label>
+    <input type="text" id="accountName" placeholder="user@example.com">
+  </div>
   <div class="buttons">
     <button id="save">Save</button>
     <button id="test">Test</button>
