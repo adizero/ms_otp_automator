@@ -4,9 +4,11 @@
   const OTP_INPUT_ID = "idTxtBx_SAOTCC_OTC";
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
+  const SKIP_LINK_ID = "iCancel";
   const SUBMIT_DELAY_MS = 500;
 
   let otpHandled = false;
+  let skipHandled = false;
 
   function fillOtpCode(code) {
     const input = document.getElementById(OTP_INPUT_ID);
@@ -70,6 +72,22 @@
     if (number) showNumberMatchOverlay(number);
   }
 
+  function handleSkipPrompt() {
+    if (skipHandled) return;
+    skipHandled = true;
+
+    chrome.storage.local.get("skipMfaRegistration", (data) => {
+      // Default to true if not set
+      const skip = data.skipMfaRegistration !== false;
+      if (!skip) {
+        skipHandled = false;
+        return;
+      }
+      const link = document.getElementById(SKIP_LINK_ID);
+      if (link) link.click();
+    });
+  }
+
   function checkPage() {
     const otpInput = document.getElementById(OTP_INPUT_ID);
     if (otpInput && otpInput.offsetParent !== null) {
@@ -80,6 +98,12 @@
     const numberMatch = document.getElementById(NUMBER_MATCH_ID);
     if (numberMatch && numberMatch.offsetParent !== null) {
       handleNumberMatch(numberMatch);
+      return;
+    }
+
+    const skipLink = document.getElementById(SKIP_LINK_ID);
+    if (skipLink && skipLink.offsetParent !== null) {
+      handleSkipPrompt();
     }
   }
 

@@ -1,17 +1,23 @@
 const commandInput = document.getElementById("command");
+const skipMfaCheckbox = document.getElementById("skipMfa");
 const saveBtn = document.getElementById("save");
 const testBtn = document.getElementById("test");
 const statusEl = document.getElementById("status");
+const extIdEl = document.getElementById("extId");
+
+extIdEl.textContent = "Extension ID: " + chrome.runtime.id;
 
 function showStatus(msg, isError) {
   statusEl.textContent = msg;
   statusEl.className = isError ? "error" : "success";
 }
 
-chrome.storage.local.get("oathtoolCommand", (data) => {
+chrome.storage.local.get(["oathtoolCommand", "skipMfaRegistration"], (data) => {
   if (data.oathtoolCommand) {
     commandInput.value = data.oathtoolCommand;
   }
+  // Default to true if not set
+  skipMfaCheckbox.checked = data.skipMfaRegistration !== false;
 });
 
 saveBtn.addEventListener("click", () => {
@@ -20,7 +26,10 @@ saveBtn.addEventListener("click", () => {
     showStatus("Command cannot be empty", true);
     return;
   }
-  chrome.storage.local.set({ oathtoolCommand: command }, () => {
+  chrome.storage.local.set({
+    oathtoolCommand: command,
+    skipMfaRegistration: skipMfaCheckbox.checked,
+  }, () => {
     showStatus("Saved");
   });
 });

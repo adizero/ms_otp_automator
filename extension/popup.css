@@ -25,6 +25,15 @@ input[type="text"] {
   box-sizing: border-box;
 }
 
+.option {
+  margin-top: 8px;
+}
+
+.option label {
+  font-weight: normal;
+  cursor: pointer;
+}
+
 .buttons {
   margin-top: 8px;
   display: flex;
@@ -71,4 +80,14 @@ button:hover {
   display: block;
   background: #fde7e7;
   color: #c42b2b;
+}
+
+.ext-id {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  font-size: 11px;
+  color: #888;
+  word-break: break-all;
+  user-select: all;
 }

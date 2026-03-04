@@ -8,11 +8,15 @@
   <h1>MS OTP Automator</h1>
   <label for="command">oathtool command:</label>
   <input type="text" id="command" placeholder="oathtool --totp -b YOUR_SECRET">
+  <div class="option">
+    <label><input type="checkbox" id="skipMfa" checked> Skip MFA registration prompt</label>
+  </div>
   <div class="buttons">
     <button id="save">Save</button>
     <button id="test">Test</button>
   </div>
   <div id="status"></div>
+  <div id="extId" class="ext-id"></div>
   <script src="popup.js"></script>
 </body>
 </html>
