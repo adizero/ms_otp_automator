@@ -89,31 +89,35 @@
     });
   }
 
-  function clickSignIn() {
+  function clickSignIn(userFilledPassword) {
     if (passwordHandled) return;
     passwordHandled = true;
 
-    // Content scripts run in an isolated world and cannot read
-    // Chrome-autofilled input.value. Inject a script into the page's
-    // main world to dispatch an input event; Knockout's textInput
-    // handler runs in that world where the value IS accessible,
-    // so it syncs the observable before we click Sign in.
-    const s = document.createElement("script");
-    s.textContent =
-      "var e=document.getElementById('" + PASSWORD_INPUT_ID + "');" +
-      "if(e){" +
-      "var s=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;" +
-      "s.call(e,e.value);" +
-      "e.dispatchEvent(new Event('input',{bubbles:true}));" +
-      "e.dispatchEvent(new Event('change',{bubbles:true}))" +
-      "}";
-    document.documentElement.appendChild(s);
-    s.remove();
-
-    setTimeout(() => {
-      const btn = document.getElementById(SIGNIN_BUTTON_ID);
-      if (btn) btn.click();
-    }, SUBMIT_DELAY_MS);
+    if (userFilledPassword) {
+      // Password was set by us via native setter — Knockout already
+      // knows the value, so a normal button click works.
+      setTimeout(() => {
+        const btn = document.getElementById(SIGNIN_BUTTON_ID);
+        if (btn) btn.click();
+      }, SUBMIT_DELAY_MS);
+    } else {
+      // Password was autofilled by Chrome/Bitwarden. Content scripts
+      // cannot read the autofilled value (isolated world) and CSP
+      // blocks inline script injection, so Knockout's observable is
+      // empty and btn.click() triggers "Please enter your password".
+      // Bypass Knockout entirely by submitting the form natively —
+      // the browser includes autofilled values in native form data.
+      setTimeout(() => {
+        const input = document.getElementById(PASSWORD_INPUT_ID);
+        const form = input && input.closest("form");
+        if (form) {
+          form.submit();
+        } else {
+          const btn = document.getElementById(SIGNIN_BUTTON_ID);
+          if (btn) btn.click();
+        }
+      }, SUBMIT_DELAY_MS);
+    }
   }
 
   function isPasswordFilled(input) {
@@ -145,12 +149,12 @@
           nativeSetter.call(input, password);
           input.dispatchEvent(new Event("input", { bubbles: true }));
           input.dispatchEvent(new Event("change", { bubbles: true }));
-          clickSignIn();
+          clickSignIn(true);
           return;
         }
 
         if (isPasswordFilled(input)) {
-          clickSignIn();
+          clickSignIn(false);
           return;
         }
 
@@ -158,10 +162,10 @@
         if (!input._msotpListener) {
           input._msotpListener = true;
           input.addEventListener("input", () => {
-            if (input.value) clickSignIn();
+            if (input.value) clickSignIn(false);
           });
           input.addEventListener("change", () => {
-            if (input.value) clickSignIn();
+            if (input.value) clickSignIn(false);
           });
         }
       }
