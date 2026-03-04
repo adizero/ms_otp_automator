@@ -119,7 +119,9 @@
         }
 
         // Click sign-in if we filled a password or the field is already populated
-        if (password || input.value) {
+        // Browser autofill hides .value from JS; detect via :-webkit-autofill
+        const autofilled = input.matches(":-webkit-autofill");
+        if (password || input.value || autofilled) {
           setTimeout(() => {
             const btn = document.getElementById(SIGNIN_BUTTON_ID);
             if (btn) btn.click();
