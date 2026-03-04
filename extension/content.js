@@ -4,13 +4,7 @@
   const OTP_INPUT_ID = "idTxtBx_SAOTCC_OTC";
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
-  const SKIP_LINK_IDS = [
-    "skipMfaRegistrationLink",
-    "iCancel",
-    "CancelLinkButton",
-    "idBtn_SAOTCAS_Cancel",
-    "iProofUpSkipForNow",
-  ];
+  const SKIP_LINK_IDS = ["skipMfaRegistrationLink"];
   const SKIP_TEXT_RE = /skip\s*(for\s*now)?|ask\s*later|i.ll\s*do\s*it\s*later/i;
   const SUBMIT_DELAY_MS = 500;
 
