@@ -89,6 +89,23 @@
     });
   }
 
+  function clickSignIn() {
+    if (passwordHandled) return;
+    passwordHandled = true;
+    setTimeout(() => {
+      const btn = document.getElementById(SIGNIN_BUTTON_ID);
+      if (btn) btn.click();
+    }, SUBMIT_DELAY_MS);
+  }
+
+  function isPasswordFilled(input) {
+    if (input.value) return true;
+    try {
+      if (input.matches(":autofill, :-webkit-autofill")) return true;
+    } catch (_) {}
+    return false;
+  }
+
   function handlePasswordEntry() {
     if (passwordHandled) return;
 
@@ -110,17 +127,24 @@
           nativeSetter.call(input, password);
           input.dispatchEvent(new Event("input", { bubbles: true }));
           input.dispatchEvent(new Event("change", { bubbles: true }));
+          clickSignIn();
+          return;
         }
 
-        // Click sign-in if we filled a password or the field is already populated
-        // Browser autofill hides .value from JS; detect via :-webkit-autofill
-        const autofilled = input.matches(":-webkit-autofill");
-        if (password || input.value || autofilled) {
-          passwordHandled = true;
-          setTimeout(() => {
-            const btn = document.getElementById(SIGNIN_BUTTON_ID);
-            if (btn) btn.click();
-          }, SUBMIT_DELAY_MS);
+        if (isPasswordFilled(input)) {
+          clickSignIn();
+          return;
+        }
+
+        // Listen for password managers that fill the field asynchronously
+        if (!input._msotpListener) {
+          input._msotpListener = true;
+          input.addEventListener("input", () => {
+            if (input.value) clickSignIn();
+          });
+          input.addEventListener("change", () => {
+            if (input.value) clickSignIn();
+          });
         }
       }
     );
