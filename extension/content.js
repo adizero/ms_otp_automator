@@ -92,6 +92,20 @@
   function clickSignIn() {
     if (passwordHandled) return;
     passwordHandled = true;
+
+    // Re-set the autofilled value via native setter and dispatch events
+    // so Knockout's textInput binding syncs its observable before submit
+    const input = document.getElementById(PASSWORD_INPUT_ID);
+    if (input && input.value) {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      ).set;
+      nativeSetter.call(input, input.value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
     setTimeout(() => {
       const btn = document.getElementById(SIGNIN_BUTTON_ID);
       if (btn) btn.click();
