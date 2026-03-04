@@ -88,6 +88,9 @@ button:hover {
   border-top: 1px solid #eee;
   font-size: 11px;
   color: #888;
-  word-break: break-all;
+}
+
+.ext-id code {
   user-select: all;
+  color: #555;
 }

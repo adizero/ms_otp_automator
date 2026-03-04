@@ -5,7 +5,7 @@ const testBtn = document.getElementById("test");
 const statusEl = document.getElementById("status");
 const extIdEl = document.getElementById("extId");
 
-extIdEl.textContent = "Extension ID: " + chrome.runtime.id;
+extIdEl.textContent = chrome.runtime.id;
 
 function showStatus(msg, isError) {
   statusEl.textContent = msg;

@@ -4,7 +4,13 @@
   const OTP_INPUT_ID = "idTxtBx_SAOTCC_OTC";
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
-  const SKIP_LINK_ID = "iCancel";
+  const SKIP_LINK_IDS = [
+    "iCancel",
+    "CancelLinkButton",
+    "idBtn_SAOTCAS_Cancel",
+    "iProofUpSkipForNow",
+  ];
+  const SKIP_TEXT_RE = /skip\s*(for\s*now)?|ask\s*later|i.ll\s*do\s*it\s*later/i;
   const SUBMIT_DELAY_MS = 500;
 
   let otpHandled = false;
@@ -72,7 +78,28 @@
     if (number) showNumberMatchOverlay(number);
   }
 
-  function handleSkipPrompt() {
+  function isVisible(el) {
+    if (!el) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== "none" && style.visibility !== "hidden" && el.offsetWidth > 0;
+  }
+
+  function findSkipLink() {
+    // Try known element IDs first
+    for (const id of SKIP_LINK_IDS) {
+      const el = document.getElementById(id);
+      if (isVisible(el)) return el;
+    }
+    // Fallback: find any clickable element with skip-related text
+    const clickables = document.querySelectorAll("a, button, input[type='button'], input[type='submit'], div[role='button'], span[role='button']");
+    for (const el of clickables) {
+      const text = el.textContent || el.value || "";
+      if (SKIP_TEXT_RE.test(text) && isVisible(el)) return el;
+    }
+    return null;
+  }
+
+  function handleSkipPrompt(link) {
     if (skipHandled) return;
     skipHandled = true;
 
@@ -83,27 +110,26 @@
         skipHandled = false;
         return;
       }
-      const link = document.getElementById(SKIP_LINK_ID);
-      if (link) link.click();
+      link.click();
     });
   }
 
   function checkPage() {
     const otpInput = document.getElementById(OTP_INPUT_ID);
-    if (otpInput && otpInput.offsetParent !== null) {
+    if (isVisible(otpInput)) {
       handleOtpInput();
       return;
     }
 
     const numberMatch = document.getElementById(NUMBER_MATCH_ID);
-    if (numberMatch && numberMatch.offsetParent !== null) {
+    if (isVisible(numberMatch)) {
       handleNumberMatch(numberMatch);
       return;
     }
 
-    const skipLink = document.getElementById(SKIP_LINK_ID);
-    if (skipLink && skipLink.offsetParent !== null) {
-      handleSkipPrompt();
+    const skipLink = findSkipLink();
+    if (skipLink) {
+      handleSkipPrompt(skipLink);
     }
   }
 
