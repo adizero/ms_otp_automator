@@ -5,6 +5,7 @@
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
   const SKIP_LINK_IDS = [
+    "skipMfaRegistrationLink",
     "iCancel",
     "CancelLinkButton",
     "idBtn_SAOTCAS_Cancel",
