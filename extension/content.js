@@ -246,8 +246,7 @@
   // become visible via a style change, which childList observers miss.
   const poll = setInterval(() => {
     checkPage();
-    if (otpHandled || skipHandled || accountPickerHandled || passwordHandled)
-      clearInterval(poll);
+    if (otpHandled || skipHandled) clearInterval(poll);
   }, 1000);
 
   checkPage();
