@@ -1,18 +1,14 @@
 (function () {
   "use strict";
 
-  const LOG_PREFIX = "MS OTP Automator:";
   const OTP_INPUT_ID = "idTxtBx_SAOTCC_OTC";
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
-  const SKIP_LINK_IDS = ["skipMfaRegistrationLink"];
-  const SKIP_TEXT_RE = /skip\s*(for\s*now)?|ask\s*later|i.ll\s*do\s*it\s*later/i;
+  const SKIP_LINK_ID = "skipMfaRegistrationLink";
   const SUBMIT_DELAY_MS = 500;
 
   let otpHandled = false;
   let skipHandled = false;
-
-  console.log(LOG_PREFIX, "content script loaded on", window.location.href);
 
   function fillOtpCode(code) {
     const input = document.getElementById(OTP_INPUT_ID);
@@ -76,82 +72,48 @@
     if (number) showNumberMatchOverlay(number);
   }
 
-  function isVisible(el) {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    return style.display !== "none" && style.visibility !== "hidden" && el.offsetWidth > 0;
-  }
-
-  function findSkipLink() {
-    // Try known element ID first
-    for (const id of SKIP_LINK_IDS) {
-      const el = document.getElementById(id);
-      if (el) return el;
-    }
-    // Fallback: find any link with skip-related text
-    const links = document.querySelectorAll("a[href]");
-    for (const el of links) {
-      const text = el.textContent || "";
-      if (SKIP_TEXT_RE.test(text)) return el;
-    }
-    return null;
-  }
-
-  function isProofUpRedirectPage() {
-    const meta = document.querySelector('meta[name="PageID"]');
-    return meta && meta.content === "ConvergedProofUpRedirect";
-  }
-
   function handleSkipPrompt(link) {
     if (skipHandled) return;
     skipHandled = true;
 
     chrome.storage.local.get("skipMfaRegistration", (data) => {
-      // Default to true if not set
-      const skip = data.skipMfaRegistration !== false;
-      if (!skip) {
-        console.log(LOG_PREFIX, "skip disabled by user setting");
+      if (data.skipMfaRegistration === false) {
         skipHandled = false;
         return;
       }
-      console.log(LOG_PREFIX, "clicking skip link");
       link.click();
     });
   }
 
   function checkPage() {
     const otpInput = document.getElementById(OTP_INPUT_ID);
-    if (isVisible(otpInput)) {
+    if (otpInput && otpInput.offsetParent !== null) {
       handleOtpInput();
       return;
     }
 
     const numberMatch = document.getElementById(NUMBER_MATCH_ID);
-    if (isVisible(numberMatch)) {
+    if (numberMatch && numberMatch.offsetParent !== null) {
       handleNumberMatch(numberMatch);
       return;
     }
 
-    if (isProofUpRedirectPage()) {
-      const link = findSkipLink();
-      console.log(LOG_PREFIX, "proof-up page, skip link:", link);
-      if (link) {
-        handleSkipPrompt(link);
-      }
+    const meta = document.querySelector('meta[name="PageID"]');
+    if (meta && meta.content === "ConvergedProofUpRedirect") {
+      const link = document.getElementById(SKIP_LINK_ID);
+      if (link) handleSkipPrompt(link);
     }
   }
 
-  const observer = new MutationObserver(() => {
-    checkPage();
-  });
+  const observer = new MutationObserver(checkPage);
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
   });
 
-  // Periodic fallback: the MS login page body starts as display:none and
-  // becomes visible via a style change, which childList observers don't catch.
+  // Periodic fallback: MS login pages start with body display:none and
+  // become visible via a style change, which childList observers miss.
   const poll = setInterval(() => {
     checkPage();
     if (otpHandled || skipHandled) clearInterval(poll);

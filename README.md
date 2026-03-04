@@ -52,6 +52,8 @@ This registers the Python script so Chrome can communicate with it. If you skip 
 
 For **number matching** prompts (where you approve a number on your phone), the extension displays the number in an overlay — these can't be automated since they require action on the phone.
 
+The **"Protect your account"** MFA registration prompt is automatically skipped (clicks "Skip for now"). This can be disabled in the extension popup.
+
 ## File structure
 
 ```
