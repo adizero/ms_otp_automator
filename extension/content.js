@@ -93,18 +93,22 @@
     if (passwordHandled) return;
     passwordHandled = true;
 
-    // Re-set the autofilled value via native setter and dispatch events
-    // so Knockout's textInput binding syncs its observable before submit
-    const input = document.getElementById(PASSWORD_INPUT_ID);
-    if (input && input.value) {
-      const nativeSetter = Object.getOwnPropertyDescriptor(
-        HTMLInputElement.prototype,
-        "value"
-      ).set;
-      nativeSetter.call(input, input.value);
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-    }
+    // Content scripts run in an isolated world and cannot read
+    // Chrome-autofilled input.value. Inject a script into the page's
+    // main world to dispatch an input event; Knockout's textInput
+    // handler runs in that world where the value IS accessible,
+    // so it syncs the observable before we click Sign in.
+    const s = document.createElement("script");
+    s.textContent =
+      "var e=document.getElementById('" + PASSWORD_INPUT_ID + "');" +
+      "if(e){" +
+      "var s=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;" +
+      "s.call(e,e.value);" +
+      "e.dispatchEvent(new Event('input',{bubbles:true}));" +
+      "e.dispatchEvent(new Event('change',{bubbles:true}))" +
+      "}";
+    document.documentElement.appendChild(s);
+    s.remove();
 
     setTimeout(() => {
       const btn = document.getElementById(SIGNIN_BUTTON_ID);
