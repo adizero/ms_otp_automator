@@ -137,5 +137,12 @@
     subtree: true,
   });
 
+  // Periodic fallback: the MS login page body starts as display:none and
+  // becomes visible via a style change, which childList observers don't catch.
+  const poll = setInterval(() => {
+    checkPage();
+    if (otpHandled || skipHandled) clearInterval(poll);
+  }, 1000);
+
   checkPage();
 })();
