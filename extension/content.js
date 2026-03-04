@@ -91,21 +91,15 @@
 
   function handlePasswordEntry() {
     if (passwordHandled) return;
-    passwordHandled = true;
 
     chrome.storage.local.get(
       ["autoFillPassword", "autoFillPasswordValue"],
       (data) => {
-        if (data.autoFillPassword === false) {
-          passwordHandled = false;
-          return;
-        }
+        if (passwordHandled) return;
+        if (data.autoFillPassword === false) return;
 
         const input = document.getElementById(PASSWORD_INPUT_ID);
-        if (!input) {
-          passwordHandled = false;
-          return;
-        }
+        if (!input) return;
 
         const password = (data.autoFillPasswordValue || "").trim();
         if (password) {
@@ -122,12 +116,11 @@
         // Browser autofill hides .value from JS; detect via :-webkit-autofill
         const autofilled = input.matches(":-webkit-autofill");
         if (password || input.value || autofilled) {
+          passwordHandled = true;
           setTimeout(() => {
             const btn = document.getElementById(SIGNIN_BUTTON_ID);
             if (btn) btn.click();
           }, SUBMIT_DELAY_MS);
-        } else {
-          passwordHandled = false;
         }
       }
     );
