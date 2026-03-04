@@ -8,6 +8,9 @@
     "scripting",
     "storage"
   ],
+  "host_permissions": [
+    "https://login.microsoftonline.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
