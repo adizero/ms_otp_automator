@@ -50,6 +50,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // keep message channel open for async response
   }
 
+  if (request.type === "CLICK_SIGNIN") {
+    chrome.scripting.executeScript({
+      target: { tabId: sender.tab.id },
+      world: "MAIN",
+      func: (passwordId, buttonId) => {
+        const input = document.getElementById(passwordId);
+        if (input) {
+          const setter = Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype, "value"
+          ).set;
+          setter.call(input, input.value);
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        setTimeout(() => {
+          const btn = document.getElementById(buttonId);
+          if (btn) btn.click();
+        }, 500);
+      },
+      args: [request.passwordId, request.buttonId],
+    });
+    return false;
+  }
+
   if (request.type === "TEST_OTP") {
     getOtp(request.command)
       .then((otp) => sendResponse({ otp }))

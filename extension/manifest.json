@@ -5,6 +5,7 @@
   "description": "Automatically fills Microsoft MFA TOTP codes using oathtool",
   "permissions": [
     "nativeMessaging",
+    "scripting",
     "storage"
   ],
   "background": {

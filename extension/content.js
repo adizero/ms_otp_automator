@@ -103,20 +103,15 @@
     } else {
       // Password was autofilled by Chrome/Bitwarden. Content scripts
       // cannot read the autofilled value (isolated world) and CSP
-      // blocks inline script injection, so Knockout's observable is
-      // empty and btn.click() triggers "Please enter your password".
-      // Bypass Knockout entirely by submitting the form natively —
-      // the browser includes autofilled values in native form data.
-      setTimeout(() => {
-        const input = document.getElementById(PASSWORD_INPUT_ID);
-        const form = input && input.closest("form");
-        if (form) {
-          form.submit();
-        } else {
-          const btn = document.getElementById(SIGNIN_BUTTON_ID);
-          if (btn) btn.click();
-        }
-      }, SUBMIT_DELAY_MS);
+      // blocks inline script injection. Use chrome.scripting from the
+      // background to run in the page's MAIN world — this bypasses
+      // both CSP and the isolated-world restriction, letting us read
+      // the real input.value, sync Knockout, and click the button.
+      chrome.runtime.sendMessage({
+        type: "CLICK_SIGNIN",
+        passwordId: PASSWORD_INPUT_ID,
+        buttonId: SIGNIN_BUTTON_ID,
+      });
     }
   }
 
