@@ -79,22 +79,27 @@
     return style.display !== "none" && style.visibility !== "hidden" && el.offsetWidth > 0;
   }
 
-  function findSkipLink() {
-    // Try known element IDs first
+  function findSkipUrl() {
+    // Try known element ID first
     for (const id of SKIP_LINK_IDS) {
       const el = document.getElementById(id);
-      if (isVisible(el)) return el;
+      if (el && el.href) return el.href;
     }
-    // Fallback: find any clickable element with skip-related text
-    const clickables = document.querySelectorAll("a, button, input[type='button'], input[type='submit'], div[role='button'], span[role='button']");
-    for (const el of clickables) {
-      const text = el.textContent || el.value || "";
-      if (SKIP_TEXT_RE.test(text) && isVisible(el)) return el;
+    // Fallback: find any link with skip-related text
+    const links = document.querySelectorAll("a[href]");
+    for (const el of links) {
+      const text = el.textContent || "";
+      if (SKIP_TEXT_RE.test(text)) return el.href;
     }
     return null;
   }
 
-  function handleSkipPrompt(link) {
+  function isProofUpRedirectPage() {
+    const meta = document.querySelector('meta[name="PageID"]');
+    return meta && meta.content === "ConvergedProofUpRedirect";
+  }
+
+  function handleSkipPrompt(url) {
     if (skipHandled) return;
     skipHandled = true;
 
@@ -105,7 +110,8 @@
         skipHandled = false;
         return;
       }
-      link.click();
+      console.log("MS OTP Automator: skipping MFA registration", url);
+      window.location.href = url;
     });
   }
 
@@ -122,9 +128,11 @@
       return;
     }
 
-    const skipLink = findSkipLink();
-    if (skipLink) {
-      handleSkipPrompt(skipLink);
+    if (isProofUpRedirectPage()) {
+      const skipUrl = findSkipUrl();
+      if (skipUrl) {
+        handleSkipPrompt(skipUrl);
+      }
     }
   }
 
