@@ -32,12 +32,21 @@ When you hit a Microsoft Authenticator code prompt during login, the extension d
 
 This registers the Python script so Chrome can communicate with it. If you skip the extension ID argument, you'll need to re-run the command once you have it.
 
-### 3. Configure your oathtool command
+### 3. Get your TOTP secret key from Microsoft
+
+1. Go to [Security info](https://mysignins.microsoft.com/security-info) and sign in
+2. Click **Add sign-in method**
+3. Select **Microsoft Authenticator**
+4. Click **Set up a different authenticator app** → Next
+5. On the QR code page, click **Can't scan the QR code**
+6. Copy the **Secret key** (manually or using the "Copy key" button)
+
+### 4. Configure your oathtool command
 
 1. Click the extension icon in the Chrome toolbar
-2. Enter your oathtool command, e.g.:
+2. Enter your oathtool command, replacing `YOUR_SECRET` with the key from above:
    ```
-   oathtool --totp -b JBSWY3DPEHPK3PXP
+   oathtool --totp -b YOUR_SECRET
    ```
 3. Click **Save**
 4. Click **Test** to verify it returns a 6-digit code
