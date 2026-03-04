@@ -12,6 +12,13 @@
     <label><input type="checkbox" id="skipMfa" checked> Skip MFA registration prompt</label>
   </div>
   <div class="option">
+    <label><input type="checkbox" id="autoPassword" checked> Auto-fill password</label>
+  </div>
+  <div class="sub-option" id="passwordGroup">
+    <label for="password">Password (empty = use prefilled):</label>
+    <input type="password" id="password" placeholder="Leave empty if using Chrome passwords">
+  </div>
+  <div class="option">
     <label><input type="checkbox" id="autoSelect" checked> Auto-select account</label>
   </div>
   <div class="sub-option" id="accountNameGroup">

@@ -1,5 +1,8 @@
 const commandInput = document.getElementById("command");
 const skipMfaCheckbox = document.getElementById("skipMfa");
+const autoPasswordCheckbox = document.getElementById("autoPassword");
+const passwordInput = document.getElementById("password");
+const passwordGroup = document.getElementById("passwordGroup");
 const autoSelectCheckbox = document.getElementById("autoSelect");
 const accountNameInput = document.getElementById("accountName");
 const accountNameGroup = document.getElementById("accountNameGroup");
@@ -15,20 +18,30 @@ function showStatus(msg, isError) {
   statusEl.className = isError ? "error" : "success";
 }
 
+function togglePasswordGroup() {
+  passwordGroup.style.display = autoPasswordCheckbox.checked ? "" : "none";
+}
+
 function toggleAccountNameGroup() {
   accountNameGroup.style.display = autoSelectCheckbox.checked ? "" : "none";
 }
 
+autoPasswordCheckbox.addEventListener("change", togglePasswordGroup);
 autoSelectCheckbox.addEventListener("change", toggleAccountNameGroup);
 
 chrome.storage.local.get(
-  ["oathtoolCommand", "skipMfaRegistration", "autoSelectAccount", "autoSelectAccountName"],
+  ["oathtoolCommand", "skipMfaRegistration",
+   "autoFillPassword", "autoFillPasswordValue",
+   "autoSelectAccount", "autoSelectAccountName"],
   (data) => {
     if (data.oathtoolCommand) {
       commandInput.value = data.oathtoolCommand;
     }
     // Default to true if not set
     skipMfaCheckbox.checked = data.skipMfaRegistration !== false;
+    autoPasswordCheckbox.checked = data.autoFillPassword !== false;
+    passwordInput.value = data.autoFillPasswordValue || "";
+    togglePasswordGroup();
     autoSelectCheckbox.checked = data.autoSelectAccount !== false;
     accountNameInput.value = data.autoSelectAccountName || "";
     toggleAccountNameGroup();
@@ -44,6 +57,8 @@ saveBtn.addEventListener("click", () => {
   chrome.storage.local.set({
     oathtoolCommand: command,
     skipMfaRegistration: skipMfaCheckbox.checked,
+    autoFillPassword: autoPasswordCheckbox.checked,
+    autoFillPasswordValue: passwordInput.value,
     autoSelectAccount: autoSelectCheckbox.checked,
     autoSelectAccountName: accountNameInput.value.trim(),
   }, () => {

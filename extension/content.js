@@ -5,11 +5,14 @@
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
   const SKIP_LINK_ID = "skipMfaRegistrationLink";
+  const PASSWORD_INPUT_ID = "i0118";
+  const SIGNIN_BUTTON_ID = "idSIButton9";
   const SUBMIT_DELAY_MS = 500;
 
   let otpHandled = false;
   let skipHandled = false;
   let accountPickerHandled = false;
+  let passwordHandled = false;
 
   function fillOtpCode(code) {
     const input = document.getElementById(OTP_INPUT_ID);
@@ -86,6 +89,48 @@
     });
   }
 
+  function handlePasswordEntry() {
+    if (passwordHandled) return;
+    passwordHandled = true;
+
+    chrome.storage.local.get(
+      ["autoFillPassword", "autoFillPasswordValue"],
+      (data) => {
+        if (data.autoFillPassword === false) {
+          passwordHandled = false;
+          return;
+        }
+
+        const input = document.getElementById(PASSWORD_INPUT_ID);
+        if (!input) {
+          passwordHandled = false;
+          return;
+        }
+
+        const password = (data.autoFillPasswordValue || "").trim();
+        if (password) {
+          const nativeSetter = Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype,
+            "value"
+          ).set;
+          nativeSetter.call(input, password);
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        // Click sign-in if we filled a password or the field is already populated
+        if (password || input.value) {
+          setTimeout(() => {
+            const btn = document.getElementById(SIGNIN_BUTTON_ID);
+            if (btn) btn.click();
+          }, SUBMIT_DELAY_MS);
+        } else {
+          passwordHandled = false;
+        }
+      }
+    );
+  }
+
   function handleAccountPicker() {
     if (accountPickerHandled) return;
     accountPickerHandled = true;
@@ -150,6 +195,12 @@
       return;
     }
 
+    const passwordInput = document.getElementById(PASSWORD_INPUT_ID);
+    if (passwordInput && passwordInput.offsetParent !== null) {
+      handlePasswordEntry();
+      return;
+    }
+
     const meta = document.querySelector('meta[name="PageID"]');
     if (meta && meta.content === "ConvergedSignIn") {
       const tilesHolder = document.getElementById("tilesHolder");
@@ -176,7 +227,8 @@
   // become visible via a style change, which childList observers miss.
   const poll = setInterval(() => {
     checkPage();
-    if (otpHandled || skipHandled || accountPickerHandled) clearInterval(poll);
+    if (otpHandled || skipHandled || accountPickerHandled || passwordHandled)
+      clearInterval(poll);
   }, 1000);
 
   checkPage();
