@@ -111,6 +111,11 @@
         type: "CLICK_SIGNIN",
         passwordId: PASSWORD_INPUT_ID,
         buttonId: SIGNIN_BUTTON_ID,
+      }, (response) => {
+        if (chrome.runtime.lastError || !response || !response.success) {
+          // input.value wasn't available yet — retry on next poll
+          passwordHandled = false;
+        }
       });
     }
   }

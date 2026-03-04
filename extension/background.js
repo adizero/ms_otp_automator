@@ -56,22 +56,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       world: "MAIN",
       func: (passwordId, buttonId) => {
         const input = document.getElementById(passwordId);
-        if (input) {
-          const setter = Object.getOwnPropertyDescriptor(
-            HTMLInputElement.prototype, "value"
-          ).set;
-          setter.call(input, input.value);
-          input.dispatchEvent(new Event("input", { bubbles: true }));
-          input.dispatchEvent(new Event("change", { bubbles: true }));
-        }
+        if (!input || !input.value) return false;
+
+        // Dispatch input event so Knockout's textInput binding reads the
+        // autofilled input.value and syncs its observable.  Do NOT use
+        // the native setter — calling setter(input, "") when Chrome
+        // hasn't exposed the value yet wipes the autofill visual state.
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+
         setTimeout(() => {
           const btn = document.getElementById(buttonId);
           if (btn) btn.click();
         }, 500);
+        return true;
       },
       args: [request.passwordId, request.buttonId],
+    }).then((results) => {
+      const ok = results && results[0] && results[0].result;
+      sendResponse({ success: !!ok });
     });
-    return false;
+    return true; // async response
   }
 
   if (request.type === "TEST_OTP") {
