@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  const LOG_PREFIX = "MS OTP Automator:";
   const OTP_INPUT_ID = "idTxtBx_SAOTCC_OTC";
   const VERIFY_BUTTON_ID = "idSubmit_SAOTCC_Continue";
   const NUMBER_MATCH_ID = "idRichContext_DisplaySign";
@@ -10,6 +11,8 @@
 
   let otpHandled = false;
   let skipHandled = false;
+
+  console.log(LOG_PREFIX, "content script loaded on", window.location.href);
 
   function fillOtpCode(code) {
     const input = document.getElementById(OTP_INPUT_ID);
@@ -104,13 +107,15 @@
     skipHandled = true;
 
     chrome.storage.local.get("skipMfaRegistration", (data) => {
+      console.log(LOG_PREFIX, "storage result:", data);
       // Default to true if not set
       const skip = data.skipMfaRegistration !== false;
       if (!skip) {
+        console.log(LOG_PREFIX, "skip disabled by user setting");
         skipHandled = false;
         return;
       }
-      console.log("MS OTP Automator: skipping MFA registration", url);
+      console.log(LOG_PREFIX, "navigating to skip URL:", url);
       window.location.href = url;
     });
   }
@@ -128,8 +133,11 @@
       return;
     }
 
-    if (isProofUpRedirectPage()) {
+    const isProofUp = isProofUpRedirectPage();
+    if (isProofUp) {
+      console.log(LOG_PREFIX, "detected ConvergedProofUpRedirect page");
       const skipUrl = findSkipUrl();
+      console.log(LOG_PREFIX, "skip URL:", skipUrl, "skipHandled:", skipHandled);
       if (skipUrl) {
         handleSkipPrompt(skipUrl);
       }
