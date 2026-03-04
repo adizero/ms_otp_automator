@@ -52,7 +52,22 @@ This registers the Python script so Chrome can communicate with it. If you skip 
 
 For **number matching** prompts (where you approve a number on your phone), the extension displays the number in an overlay — these can't be automated since they require action on the phone.
 
-The **"Protect your account"** MFA registration prompt is automatically skipped (clicks "Skip for now"). This can be disabled in the extension popup.
+## Options
+
+All options are configurable via the extension popup (click the extension icon in the toolbar).
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| **oathtool command** | *(required)* | Shell command to generate the TOTP code (e.g. `oathtool --totp -b YOUR_SECRET`) |
+| **Skip MFA registration prompt** | On | Automatically clicks "Skip for now" on the "Protect your account" MFA registration page |
+| **Auto-fill password** | On | Fills the password and clicks "Sign in" on the password page |
+| **Password** | *(empty)* | Password to fill. When empty, the extension attempts to click "Sign in" using whatever value is already prefilled in the field |
+| **Auto-select account** | On | Automatically clicks an account tile on the "Pick an account" page |
+| **Account name** | *(empty)* | Account to select, matched as regex first, then substring against the account email. When empty, the first account is selected |
+
+### Note on browser-prefilled passwords
+
+When the password field is left empty in extension settings, the extension relies on values prefilled by Chrome's built-in password manager or extensions like Bitwarden. Due to Chrome security restrictions, autofilled password values are not always accessible to extensions, which means the automatic "Sign in" click may fail and require a manual click. For reliable fully-automated login, **set the password directly in the extension configuration**.
 
 ## File structure
 
