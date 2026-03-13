@@ -103,3 +103,7 @@ install.sh          # Installs the native messaging host
 **Code fills but verify doesn't click** — The page structure may have changed. Check that the verify button ID is still `#idSubmit_SAOTCC_Continue` in the page source.
 
 **Extension doesn't trigger** — Make sure the content script is active on the page (check `chrome://extensions` for errors). The MFA page must be on `login.microsoftonline.com`.
+
+## License
+
+Copyright (c) 2026 Adrian Kocis. Licensed under the [MIT License](LICENSE).
