@@ -67,6 +67,7 @@ All options are configurable via the extension popup (click the extension icon i
 
 | Option | Default | Description |
 |--------|---------|-------------|
+| **Enabled** | On | Global toggle — when off, the extension does nothing |
 | **oathtool command** | *(required)* | Shell command to generate the TOTP code (e.g. `oathtool --totp -b YOUR_SECRET`) |
 | **Skip MFA registration prompt** | On | Automatically clicks "Skip for now" on the "Protect your account" MFA registration page |
 | **Auto-fill password** | On | Fills the password and clicks "Sign in" on the password page |
