@@ -1,3 +1,4 @@
+const enabledCheckbox = document.getElementById("enabled");
 const commandInput = document.getElementById("command");
 const skipMfaCheckbox = document.getElementById("skipMfa");
 const autoPasswordCheckbox = document.getElementById("autoPassword");
@@ -30,10 +31,11 @@ autoPasswordCheckbox.addEventListener("change", togglePasswordGroup);
 autoSelectCheckbox.addEventListener("change", toggleAccountNameGroup);
 
 chrome.storage.local.get(
-  ["oathtoolCommand", "skipMfaRegistration",
+  ["enabled", "oathtoolCommand", "skipMfaRegistration",
    "autoFillPassword", "autoFillPasswordValue",
    "autoSelectAccount", "autoSelectAccountName"],
   (data) => {
+    enabledCheckbox.checked = data.enabled !== false;
     if (data.oathtoolCommand) {
       commandInput.value = data.oathtoolCommand;
     }
@@ -55,6 +57,7 @@ saveBtn.addEventListener("click", () => {
     return;
   }
   chrome.storage.local.set({
+    enabled: enabledCheckbox.checked,
     oathtoolCommand: command,
     skipMfaRegistration: skipMfaCheckbox.checked,
     autoFillPassword: autoPasswordCheckbox.checked,

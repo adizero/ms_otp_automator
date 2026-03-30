@@ -224,6 +224,13 @@
   }
 
   function checkPage() {
+    chrome.storage.local.get("enabled", (data) => {
+      if (data.enabled === false) return;
+      checkPageInner();
+    });
+  }
+
+  function checkPageInner() {
     const otpInput = document.getElementById(OTP_INPUT_ID);
     if (otpInput && otpInput.offsetParent !== null) {
       handleOtpInput();

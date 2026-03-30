@@ -37,7 +37,11 @@ function getOtp(command) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "GET_OTP") {
-    chrome.storage.local.get("oathtoolCommand", (data) => {
+    chrome.storage.local.get(["enabled", "oathtoolCommand"], (data) => {
+      if (data.enabled === false) {
+        sendResponse({ error: "Extension is disabled" });
+        return;
+      }
       const command = data.oathtoolCommand;
       if (!command) {
         sendResponse({ error: "No oathtool command configured" });
