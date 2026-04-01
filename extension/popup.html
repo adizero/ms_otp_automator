@@ -10,26 +10,36 @@
     <label><input type="checkbox" id="enabled" checked> Enabled</label>
   </div>
   <div id="settings">
-    <div class="option">
-      <label><input type="checkbox" id="autoSelect" checked> Auto-select account</label>
+    <div class="section">
+      <div class="option">
+        <label><input type="checkbox" id="autoSelect" checked> Auto-select account</label>
+      </div>
+      <div class="sub-option" id="accountNameGroup">
+        <label for="accountName">Account name (regex/substring, empty = first):</label>
+        <input type="text" id="accountName" placeholder="user@example.com">
+      </div>
     </div>
-    <div class="sub-option" id="accountNameGroup">
-      <label for="accountName">Account name (regex/substring, empty = first):</label>
-      <input type="text" id="accountName" placeholder="user@example.com">
+    <div class="section">
+      <div class="option">
+        <label><input type="checkbox" id="autoPassword" checked> Auto-fill password</label>
+      </div>
+      <div class="sub-option" id="passwordGroup">
+        <label for="password">Password (empty = use prefilled):</label>
+        <input type="password" id="password" placeholder="Leave empty if using Chrome passwords">
+      </div>
     </div>
-    <div class="option">
-      <label><input type="checkbox" id="autoPassword" checked> Auto-fill password</label>
+    <div class="section">
+      <label for="command">oathtool command:</label>
+      <input type="text" id="command" placeholder="oathtool --totp -b YOUR_SECRET">
+      <div class="test-row">
+        <button id="test">Test</button>
+        <span id="status"></span>
+      </div>
     </div>
-    <div class="sub-option" id="passwordGroup">
-      <label for="password">Password (empty = use prefilled):</label>
-      <input type="password" id="password" placeholder="Leave empty if using Chrome passwords">
-    </div>
-    <label for="command">oathtool command:</label>
-    <input type="text" id="command" placeholder="oathtool --totp -b YOUR_SECRET">
-    <button id="test">Test</button>
-    <div id="status"></div>
-    <div class="option">
-      <label><input type="checkbox" id="skipMfa" checked> Skip MFA registration prompt</label>
+    <div class="section">
+      <div class="option">
+        <label><input type="checkbox" id="skipMfa" checked> Skip MFA registration prompt</label>
+      </div>
     </div>
   </div>
   <div class="ext-id">Extension ID: <code id="extId"></code></div>

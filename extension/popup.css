@@ -49,12 +49,21 @@ input[type="password"] {
   pointer-events: none;
 }
 
-.option {
-  margin-top: 8px;
+.section {
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.section:last-child {
+  margin-bottom: 0;
 }
 
 .option label {
   font-weight: normal;
+  margin-bottom: 0;
   cursor: pointer;
 }
 
@@ -72,8 +81,14 @@ input[type="password"] {
   margin-top: 2px;
 }
 
-#test {
+.test-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 6px;
+}
+
+#test {
   padding: 4px 12px;
   border: none;
   border-radius: 4px;
@@ -81,6 +96,7 @@ input[type="password"] {
   cursor: pointer;
   color: #fff;
   background: #555;
+  flex-shrink: 0;
 }
 
 #test:hover {
@@ -88,22 +104,17 @@ input[type="password"] {
 }
 
 #status {
-  margin-top: 4px;
-  padding: 6px 8px;
-  border-radius: 4px;
   font-size: 12px;
   display: none;
 }
 
 #status.success {
-  display: block;
-  background: #dff6dd;
+  display: inline;
   color: #1e7e1e;
 }
 
 #status.error {
-  display: block;
-  background: #fde7e7;
+  display: inline;
   color: #c42b2b;
 }
 
