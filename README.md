@@ -68,12 +68,12 @@ All options are configurable via the extension popup (click the extension icon i
 | Option | Default | Description |
 |--------|---------|-------------|
 | **Enabled** | On | Global toggle — when off, the extension does nothing |
-| **oathtool command** | *(required)* | Shell command to generate the TOTP code (e.g. `oathtool --totp -b YOUR_SECRET`) |
-| **Skip MFA registration prompt** | On | Automatically clicks "Skip for now" on the "Protect your account" MFA registration page |
-| **Auto-fill password** | On | Fills the password and clicks "Sign in" on the password page |
-| **Password** | *(empty)* | Password to fill. When empty, the extension attempts to click "Sign in" using whatever value is already prefilled in the field |
 | **Auto-select account** | On | Automatically clicks an account tile on the "Pick an account" page |
 | **Account name** | *(empty)* | Account to select, matched as regex first, then substring against the account email. When empty, the first account is selected |
+| **Auto-fill password** | On | Fills the password and clicks "Sign in" on the password page |
+| **Password** | *(empty)* | Password to fill. When empty, the extension attempts to click "Sign in" using whatever value is already prefilled in the field |
+| **oathtool command** | *(required)* | Shell command to generate the TOTP code (e.g. `oathtool --totp -b YOUR_SECRET`) |
+| **Skip MFA registration prompt** | On | Automatically clicks "Skip for now" on the "Protect your account" MFA registration page |
 
 ### Note on browser-prefilled passwords
 
