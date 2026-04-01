@@ -7,7 +7,8 @@ const passwordGroup = document.getElementById("passwordGroup");
 const autoSelectCheckbox = document.getElementById("autoSelect");
 const accountNameInput = document.getElementById("accountName");
 const accountNameGroup = document.getElementById("accountNameGroup");
-const saveBtn = document.getElementById("save");
+const settingsDiv = document.getElementById("settings");
+const globalToggleDiv = enabledCheckbox.closest(".global-toggle");
 const testBtn = document.getElementById("test");
 const statusEl = document.getElementById("status");
 const extIdEl = document.getElementById("extId");
@@ -19,6 +20,24 @@ function showStatus(msg, isError) {
   statusEl.className = isError ? "error" : "success";
 }
 
+function save() {
+  chrome.storage.local.set({
+    enabled: enabledCheckbox.checked,
+    oathtoolCommand: commandInput.value.trim(),
+    skipMfaRegistration: skipMfaCheckbox.checked,
+    autoFillPassword: autoPasswordCheckbox.checked,
+    autoFillPasswordValue: passwordInput.value,
+    autoSelectAccount: autoSelectCheckbox.checked,
+    autoSelectAccountName: accountNameInput.value.trim(),
+  });
+}
+
+function toggleEnabled() {
+  const on = enabledCheckbox.checked;
+  settingsDiv.classList.toggle("disabled", !on);
+  globalToggleDiv.classList.toggle("disabled", !on);
+}
+
 function togglePasswordGroup() {
   passwordGroup.style.display = autoPasswordCheckbox.checked ? "" : "none";
 }
@@ -27,8 +46,13 @@ function toggleAccountNameGroup() {
   accountNameGroup.style.display = autoSelectCheckbox.checked ? "" : "none";
 }
 
-autoPasswordCheckbox.addEventListener("change", togglePasswordGroup);
-autoSelectCheckbox.addEventListener("change", toggleAccountNameGroup);
+enabledCheckbox.addEventListener("change", () => { toggleEnabled(); save(); });
+skipMfaCheckbox.addEventListener("change", save);
+autoPasswordCheckbox.addEventListener("change", () => { togglePasswordGroup(); save(); });
+autoSelectCheckbox.addEventListener("change", () => { toggleAccountNameGroup(); save(); });
+commandInput.addEventListener("change", save);
+passwordInput.addEventListener("change", save);
+accountNameInput.addEventListener("change", save);
 
 chrome.storage.local.get(
   ["enabled", "oathtoolCommand", "skipMfaRegistration",
@@ -36,10 +60,10 @@ chrome.storage.local.get(
    "autoSelectAccount", "autoSelectAccountName"],
   (data) => {
     enabledCheckbox.checked = data.enabled !== false;
+    toggleEnabled();
     if (data.oathtoolCommand) {
       commandInput.value = data.oathtoolCommand;
     }
-    // Default to true if not set
     skipMfaCheckbox.checked = data.skipMfaRegistration !== false;
     autoPasswordCheckbox.checked = data.autoFillPassword !== false;
     passwordInput.value = data.autoFillPasswordValue || "";
@@ -49,25 +73,6 @@ chrome.storage.local.get(
     toggleAccountNameGroup();
   }
 );
-
-saveBtn.addEventListener("click", () => {
-  const command = commandInput.value.trim();
-  if (!command) {
-    showStatus("Command cannot be empty", true);
-    return;
-  }
-  chrome.storage.local.set({
-    enabled: enabledCheckbox.checked,
-    oathtoolCommand: command,
-    skipMfaRegistration: skipMfaCheckbox.checked,
-    autoFillPassword: autoPasswordCheckbox.checked,
-    autoFillPasswordValue: passwordInput.value,
-    autoSelectAccount: autoSelectCheckbox.checked,
-    autoSelectAccountName: accountNameInput.value.trim(),
-  }, () => {
-    showStatus("Saved");
-  });
-});
 
 testBtn.addEventListener("click", () => {
   const command = commandInput.value.trim();
