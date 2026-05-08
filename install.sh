@@ -14,7 +14,7 @@ usage() {
     echo ""
     echo "  EXTENSION_ID is the ID shown on the extension card."
     echo "  For Firefox it defaults to '$FIREFOX_DEFAULT_ID'"
-    echo "  (matches browser_specific_settings.gecko.id in manifest.json)."
+    echo "  (matches browser_specific_settings.gecko.id in extension-firefox/manifest.json)."
     exit 1
 }
 

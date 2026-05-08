@@ -3,6 +3,12 @@
   "name": "MS OTP Automator",
   "version": "1.0",
   "description": "Automatically fills Microsoft MFA TOTP codes using oathtool",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ms-otp-automator@local",
+      "strict_min_version": "128.0"
+    }
+  },
   "permissions": [
     "nativeMessaging",
     "scripting",
@@ -12,7 +18,7 @@
     "https://login.microsoftonline.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {

@@ -37,9 +37,9 @@ This registers the Python script so Chrome can communicate with it. If you skip 
 ### 1. Load the extension
 
 1. Open `about:debugging#/runtime/this-firefox`
-2. Click **Load Temporary Add-on…** and pick any file inside the `extension/` directory (e.g. `manifest.json`)
+2. Click **Load Temporary Add-on…** and pick any file inside the `extension-firefox/` directory (e.g. `manifest.json`)
 
-The extension ID is fixed by `browser_specific_settings.gecko.id` in the manifest, so it stays `ms-otp-automator@local` across reloads.
+`extension-firefox/` shares all code with `extension/` via symlinks; only the manifest differs (Firefox needs `background.scripts`, Chrome needs `background.service_worker`). The extension ID is fixed by `browser_specific_settings.gecko.id` in the manifest, so it stays `ms-otp-automator@local` across reloads.
 
 > Note: temporary add-ons are removed when Firefox restarts. For a persistent install, package the extension as a signed `.xpi` (see [Mozilla's docs](https://extensionworkshop.com/documentation/publish/)).
 
@@ -101,17 +101,24 @@ When the password field is left empty in extension settings, the extension relie
 ## File structure
 
 ```
-extension/
-  manifest.json     # MV3 manifest (Chrome + Firefox)
-  background.js     # Service worker — native messaging bridge
-  content.js        # Detects MS auth pages, fills OTP codes
-  popup.html        # Config UI
-  popup.js          # Config UI logic
-  popup.css         # Config UI styles
+extension/                   # Load this dir in Chrome
+  manifest.json              # MV3 manifest (background.service_worker)
+  background.js              # Native messaging bridge
+  content.js                 # Detects MS auth pages, fills OTP codes
+  popup.html                 # Config UI
+  popup.js                   # Config UI logic
+  popup.css                  # Config UI styles
+extension-firefox/           # Load this dir in Firefox
+  manifest.json              # MV3 manifest (background.scripts + gecko id)
+  background.js → ../extension/background.js   (symlink)
+  content.js    → ../extension/content.js      (symlink)
+  popup.html    → ../extension/popup.html      (symlink)
+  popup.js      → ../extension/popup.js        (symlink)
+  popup.css     → ../extension/popup.css       (symlink)
 native_host/
-  ms_otp_host.py    # Python native messaging host
+  ms_otp_host.py             # Python native messaging host
   com.ms_otp_automator.json  # Host manifest template
-install.sh          # Installs the native messaging host (use --firefox for Firefox)
+install.sh                   # Installs the native messaging host (use --firefox for Firefox)
 ```
 
 ## Troubleshooting
