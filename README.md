@@ -15,28 +15,20 @@ When you hit a Microsoft Authenticator code prompt during login, the extension d
   brew install oath-toolkit         # macOS
   ```
 
-## Setup (Chrome / Chromium)
+## Setup
 
 ### 1. Load the extension
+
+#### Chrome / Chromium
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode** (toggle in top right)
 3. Click **Load unpacked** and select the `extension/` directory
 4. Copy the **extension ID** shown on the card
 
-### 2. Install the native messaging host
-
-```bash
-./install.sh <YOUR_EXTENSION_ID>
-```
-
-This registers the Python script so Chrome can communicate with it. If you skip the extension ID argument, you'll need to re-run the command once you have it.
-
-## Setup (Firefox)
+#### Firefox
 
 `extension-firefox/` shares all code with `extension/` via symlinks; only the manifest differs (Firefox needs `background.scripts`, Chrome needs `background.service_worker`). The extension ID is fixed by `browser_specific_settings.gecko.id` in the manifest, so it stays `ms-otp-automator@local` across reloads and signed builds.
-
-### 1. Load the extension
 
 Pick one of the following:
 
@@ -67,6 +59,16 @@ Pick one of the following:
 
 ### 2. Install the native messaging host
 
+#### Chrome / Chromium
+
+```bash
+./install.sh <YOUR_EXTENSION_ID>
+```
+
+This registers the Python script so Chrome can communicate with it. If you skip the extension ID argument, you'll need to re-run the command once you have it.
+
+#### Firefox
+
 ```bash
 ./install.sh --firefox
 ```
@@ -84,13 +86,12 @@ The Firefox add-on ID defaults to the one declared in the manifest, so no argume
 
 ### 4. Configure your oathtool command
 
-1. Click the extension icon in the Chrome toolbar
+1. Click the extension icon in the browser toolbar
 2. Enter your oathtool command, replacing `YOUR_SECRET` with the key from above:
    ```
    oathtool --totp -b YOUR_SECRET
    ```
-3. Click **Save**
-4. Click **Test** to verify it returns a 6-digit code
+3. Click **Test** to verify it returns a 6-digit code
 
 ## How it works
 
