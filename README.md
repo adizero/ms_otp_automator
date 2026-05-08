@@ -1,12 +1,12 @@
 # MS OTP Automator
 
-Chrome extension that automatically fills Microsoft MFA TOTP codes using `oathtool`.
+Browser extension that automatically fills Microsoft MFA TOTP codes using `oathtool`. Supports Chrome/Chromium and Firefox 128+.
 
 When you hit a Microsoft Authenticator code prompt during login, the extension detects the input field, runs your configured `oathtool` command via a local Python script, fills the code, and clicks verify.
 
 ## Prerequisites
 
-- Google Chrome or Chromium
+- Google Chrome / Chromium, or Firefox 128+
 - Python 3
 - `oathtool` — install with:
   ```
@@ -15,7 +15,7 @@ When you hit a Microsoft Authenticator code prompt during login, the extension d
   brew install oath-toolkit         # macOS
   ```
 
-## Setup
+## Setup (Chrome / Chromium)
 
 ### 1. Load the extension
 
@@ -31,6 +31,25 @@ When you hit a Microsoft Authenticator code prompt during login, the extension d
 ```
 
 This registers the Python script so Chrome can communicate with it. If you skip the extension ID argument, you'll need to re-run the command once you have it.
+
+## Setup (Firefox)
+
+### 1. Load the extension
+
+1. Open `about:debugging#/runtime/this-firefox`
+2. Click **Load Temporary Add-on…** and pick any file inside the `extension/` directory (e.g. `manifest.json`)
+
+The extension ID is fixed by `browser_specific_settings.gecko.id` in the manifest, so it stays `ms-otp-automator@local` across reloads.
+
+> Note: temporary add-ons are removed when Firefox restarts. For a persistent install, package the extension as a signed `.xpi` (see [Mozilla's docs](https://extensionworkshop.com/documentation/publish/)).
+
+### 2. Install the native messaging host
+
+```bash
+./install.sh --firefox
+```
+
+The Firefox add-on ID defaults to the one declared in the manifest, so no argument is needed.
 
 ### 3. Get your TOTP secret key from Microsoft
 
@@ -77,13 +96,13 @@ All options are configurable via the extension popup (click the extension icon i
 
 ### Note on browser-prefilled passwords
 
-When the password field is left empty in extension settings, the extension relies on values prefilled by Chrome's built-in password manager or extensions like Bitwarden. Due to Chrome security restrictions, autofilled password values are not always accessible to extensions, which means the automatic "Sign in" click may fail and require a manual click. For reliable fully-automated login, **set the password directly in the extension configuration**.
+When the password field is left empty in extension settings, the extension relies on values prefilled by the browser's built-in password manager or extensions like Bitwarden. Due to browser security restrictions, autofilled password values are not always accessible to extensions, which means the automatic "Sign in" click may fail and require a manual click. For reliable fully-automated login, **set the password directly in the extension configuration**.
 
 ## File structure
 
 ```
 extension/
-  manifest.json     # Chrome extension manifest (MV3)
+  manifest.json     # MV3 manifest (Chrome + Firefox)
   background.js     # Service worker — native messaging bridge
   content.js        # Detects MS auth pages, fills OTP codes
   popup.html        # Config UI
@@ -92,7 +111,7 @@ extension/
 native_host/
   ms_otp_host.py    # Python native messaging host
   com.ms_otp_automator.json  # Host manifest template
-install.sh          # Installs the native messaging host
+install.sh          # Installs the native messaging host (use --firefox for Firefox)
 ```
 
 ## Troubleshooting
@@ -103,7 +122,7 @@ install.sh          # Installs the native messaging host
 
 **Code fills but verify doesn't click** — The page structure may have changed. Check that the verify button ID is still `#idSubmit_SAOTCC_Continue` in the page source.
 
-**Extension doesn't trigger** — Make sure the content script is active on the page (check `chrome://extensions` for errors). The MFA page must be on `login.microsoftonline.com`.
+**Extension doesn't trigger** — Make sure the content script is active on the page (check `chrome://extensions` or `about:debugging` for errors). The MFA page must be on `login.microsoftonline.com`.
 
 ## License
 
