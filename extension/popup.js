@@ -11,13 +11,22 @@ const settingsDiv = document.getElementById("settings");
 const globalToggleDiv = enabledCheckbox.closest(".global-toggle");
 const testBtn = document.getElementById("test");
 const statusEl = document.getElementById("status");
+const copyBtn = document.getElementById("copy");
 const extIdEl = document.getElementById("extId");
+
+let lastOtp = "";
 
 extIdEl.textContent = chrome.runtime.id;
 
 function showStatus(msg, isError) {
   statusEl.textContent = msg;
   statusEl.className = isError ? "error" : "success";
+}
+
+function setOtp(otp) {
+  lastOtp = otp || "";
+  copyBtn.style.display = lastOtp ? "inline-block" : "none";
+  copyBtn.textContent = "Copy";
 }
 
 function save() {
@@ -76,6 +85,7 @@ chrome.storage.local.get(
 
 testBtn.addEventListener("click", () => {
   const command = commandInput.value.trim();
+  setOtp("");
   if (!command) {
     showStatus("Enter a command first", true);
     return;
@@ -94,7 +104,19 @@ testBtn.addEventListener("click", () => {
         showStatus("Error: " + response.error, true);
       } else {
         showStatus("OTP: " + response.otp);
+        setOtp(response.otp);
       }
     }
   );
+});
+
+copyBtn.addEventListener("click", async () => {
+  if (!lastOtp) return;
+  try {
+    await navigator.clipboard.writeText(lastOtp);
+    copyBtn.textContent = "Copied";
+    setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
+  } catch (e) {
+    showStatus("Copy failed: " + e.message, true);
+  }
 });
