@@ -34,14 +34,36 @@ This registers the Python script so Chrome can communicate with it. If you skip 
 
 ## Setup (Firefox)
 
+`extension-firefox/` shares all code with `extension/` via symlinks; only the manifest differs (Firefox needs `background.scripts`, Chrome needs `background.service_worker`). The extension ID is fixed by `browser_specific_settings.gecko.id` in the manifest, so it stays `ms-otp-automator@local` across reloads and signed builds.
+
 ### 1. Load the extension
 
+Pick one of the following:
+
+**a) Temporary (gone after Firefox restarts)** — quickest for testing.
+
 1. Open `about:debugging#/runtime/this-firefox`
-2. Click **Load Temporary Add-on…** and pick any file inside the `extension-firefox/` directory (e.g. `manifest.json`)
+2. Click **Load Temporary Add-on…** and pick any file inside `extension-firefox/` (e.g. `manifest.json`)
 
-`extension-firefox/` shares all code with `extension/` via symlinks; only the manifest differs (Firefox needs `background.scripts`, Chrome needs `background.service_worker`). The extension ID is fixed by `browser_specific_settings.gecko.id` in the manifest, so it stays `ms-otp-automator@local` across reloads.
+**b) Permanent on Developer Edition / Nightly / Unbranded** — no AMO account needed.
 
-> Note: temporary add-ons are removed when Firefox restarts. For a persistent install, package the extension as a signed `.xpi` (see [Mozilla's docs](https://extensionworkshop.com/documentation/publish/)).
+1. In `about:config`, set `xpinstall.signatures.required` to `false`
+2. Build the XPI:
+   ```bash
+   ./build-xpi.sh
+   ```
+3. Install via `about:addons` → gear icon → **Install Add-on From File…** → pick the generated `ms-otp-automator-firefox-*.xpi`
+
+**c) Permanent on regular Firefox release** — requires Mozilla-signed XPI.
+
+1. Get an AMO API key/secret at https://addons.mozilla.org/developers/addon/api/key/
+2. Sign with [`web-ext`](https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/):
+   ```bash
+   web-ext sign --channel=unlisted \
+     --api-key=$AMO_JWT_ISSUER --api-secret=$AMO_JWT_SECRET \
+     --source-dir=extension-firefox
+   ```
+3. Install the signed XPI from `web-ext-artifacts/` via `about:addons` → gear icon → **Install Add-on From File…**
 
 ### 2. Install the native messaging host
 
@@ -119,6 +141,7 @@ native_host/
   ms_otp_host.py             # Python native messaging host
   com.ms_otp_automator.json  # Host manifest template
 install.sh                   # Installs the native messaging host (use --firefox for Firefox)
+build-xpi.sh                 # Packages extension-firefox/ into a Firefox-installable XPI
 ```
 
 ## Troubleshooting
