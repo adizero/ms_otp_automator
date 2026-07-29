@@ -18,7 +18,9 @@ function getOtp(command) {
       if (msg.error) {
         reject(new Error(msg.error));
       } else {
-        resolve(msg.otp);
+        // Keep source/reason so the popup can show whether the code came from
+        // the oathtool binary or the host's built-in TOTP fallback.
+        resolve({ otp: msg.otp, source: msg.source, reason: msg.reason });
       }
     });
 
@@ -48,7 +50,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return;
       }
       getOtp(command)
-        .then((otp) => sendResponse({ otp }))
+        .then((result) => sendResponse(result))
         .catch((err) => sendResponse({ error: err.message }));
     });
     return true; // keep message channel open for async response
@@ -85,7 +87,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.type === "TEST_OTP") {
     getOtp(request.command)
-      .then((otp) => sendResponse({ otp }))
+      .then((result) => sendResponse(result))
       .catch((err) => sendResponse({ error: err.message }));
     return true;
   }

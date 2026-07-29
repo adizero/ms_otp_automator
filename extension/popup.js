@@ -103,7 +103,10 @@ testBtn.addEventListener("click", () => {
       if (response.error) {
         showStatus("Error: " + response.error, true);
       } else {
-        showStatus("OTP: " + response.otp);
+        const via = response.source === "builtin"
+          ? "built-in TOTP — " + (response.reason || "oathtool unavailable")
+          : "oathtool command";
+        showStatus("OTP: " + response.otp + "\ncomputed by: " + via);
         setOtp(response.otp);
       }
     }

@@ -1,5 +1,5 @@
 body {
-  width: 340px;
+  width: 420px;
   padding: 12px;
   font-family: system-ui, sans-serif;
   font-size: 13px;
@@ -115,14 +115,34 @@ input[type="password"] {
   display: none;
 }
 
+/* Errors can be long (shell diagnostics, full PATH dumps), so give the status
+   its own full-width row that wraps, scrolls, and can be selected to copy. */
+#status.success,
+#status.error {
+  display: block;
+  margin-top: 6px;
+  padding: 6px 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
 #status.success {
-  display: inline;
   color: #1e7e1e;
+  background: #eef8ee;
+  border: 1px solid #bfe0bf;
 }
 
 #status.error {
-  display: inline;
   color: #c42b2b;
+  background: #fdeeee;
+  border: 1px solid #efc0c0;
 }
 
 .ext-id {

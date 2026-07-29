@@ -8,7 +8,9 @@ When you hit a Microsoft Authenticator code prompt during login, the extension d
 
 - Google Chrome / Chromium, or Firefox 128+
 - Python 3
-- `oathtool` — install with:
+- `oathtool` — *optional*. For a plain `oathtool --totp` command the native host computes the
+  code itself using the Python standard library, so the binary is only needed if you use options
+  beyond `-b/--base32`, `--totp[=ALG]`, `-d/--digits` and `-s/--time-step-size`. To install it:
   ```
   sudo apt install oathtool        # Debian/Ubuntu
   sudo pacman -S oath-toolkit      # Arch
@@ -150,6 +152,34 @@ build-xpi.sh                 # Packages extension-firefox/ into a Firefox-instal
 **"Failed to connect to native host"** — Re-run `./install.sh` with the correct extension ID. Make sure `ms_otp_host.py` is executable.
 
 **"oathtool not found"** — Install `oathtool` (see Prerequisites).
+
+**"Command failed (exit 127): oathtool: command not found"** — the native host could not run the
+`oathtool` binary. Two causes, both handled automatically:
+
+- The browser launched the host with a `PATH` that doesn't include `oathtool`. The host appends
+  the standard bin directories (`/usr/local/bin`, `/usr/bin`, `/bin`, `~/.local/bin`, `~/bin`)
+  and reports the `PATH` it used in the error.
+- The browser is **sandboxed in a container** (Conty, Flatpak, Snap) whose filesystem has no
+  `oathtool` at all. No `PATH` can fix this — the binary genuinely isn't there, and the host's
+  `$HOME` is bind-mounted while the host's `/usr/bin` is not.
+
+In both cases, when the command is a plain `oathtool --totp` invocation the host computes the
+code itself (RFC 6238, Python stdlib only) instead of failing, so no external binary is needed.
+If the command uses options the host doesn't recognise — `--window`, HOTP mode, an unsupported
+digest — it reports the error rather than guessing at a code.
+
+The **Test** button shows which path produced the code, so the fallback is never silent:
+
+```
+OTP: 471486
+computed by: oathtool command
+
+OTP: 471486
+computed by: built-in TOTP — oathtool exited 127 (command not found)
+```
+
+If your `oathtool` lives somewhere unusual, you can also just give an absolute path in the
+command field, e.g. `/opt/local/bin/oathtool --totp -b SECRET`.
 
 **Code fills but verify doesn't click** — The page structure may have changed. Check that the verify button ID is still `#idSubmit_SAOTCC_Continue` in the page source.
 
