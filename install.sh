@@ -83,7 +83,8 @@ EOF
     echo "Native messaging host installed for $BROWSER:"
     echo "  Manifest: $HOST_MANIFEST_DST"
 done
-echo "  Script:   $HOST_PY"
+echo ""
+echo "Script:   $HOST_PY"
 echo ""
 
 if [ "$BROWSER" = "chrome" ] && [ "$EXT_ID" = "EXTENSION_ID_HERE" ]; then
