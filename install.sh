@@ -35,32 +35,40 @@ done
 chmod +x "$HOST_PY"
 
 if [ "$BROWSER" = "firefox" ]; then
-    TARGET_DIR="$HOME/.mozilla/native-messaging-hosts"
+    TARGET_DIRS=("$HOME/.mozilla/native-messaging-hosts")
     EXT_ID="${EXT_ID:-$FIREFOX_DEFAULT_ID}"
     ALLOWED_KEY="allowed_extensions"
     ALLOWED_VALUE="\"$EXT_ID\""
 else
-    CHROME_DIR="$HOME/.config/google-chrome/NativeMessagingHosts"
-    CHROMIUM_DIR="$HOME/.config/chromium/NativeMessagingHosts"
-    if [ -d "$HOME/.config/google-chrome" ]; then
-        TARGET_DIR="$CHROME_DIR"
-    elif [ -d "$HOME/.config/chromium" ]; then
-        TARGET_DIR="$CHROMIUM_DIR"
-    else
-        echo "Neither Chrome nor Chromium config directory found."
-        echo "Creating Chrome directory: $CHROME_DIR"
-        TARGET_DIR="$CHROME_DIR"
+    # Chrome/Chromium keep a separate profile (and NativeMessagingHosts dir)
+    # per release channel, so a manifest installed for stable is invisible
+    # to Beta/Dev/Chromium. Install into every channel dir that exists.
+    CHROME_CHANNEL_DIRS=(google-chrome google-chrome-beta google-chrome-unstable chromium)
+
+    TARGET_DIRS=()
+    for channel in "${CHROME_CHANNEL_DIRS[@]}"; do
+        if [ -d "$HOME/.config/$channel" ]; then
+            TARGET_DIRS+=("$HOME/.config/$channel/NativeMessagingHosts")
+        fi
+    done
+
+    if [ ${#TARGET_DIRS[@]} -eq 0 ]; then
+        echo "No Chrome/Chromium config directory found."
+        echo "Creating Chrome (stable) directory: $HOME/.config/google-chrome/NativeMessagingHosts"
+        TARGET_DIRS=("$HOME/.config/google-chrome/NativeMessagingHosts")
     fi
+
     EXT_ID="${EXT_ID:-EXTENSION_ID_HERE}"
     ALLOWED_KEY="allowed_origins"
     ALLOWED_VALUE="\"chrome-extension://$EXT_ID/\""
 fi
 
-mkdir -p "$TARGET_DIR"
+for TARGET_DIR in "${TARGET_DIRS[@]}"; do
+    mkdir -p "$TARGET_DIR"
 
-HOST_MANIFEST_DST="$TARGET_DIR/$HOST_NAME.json"
+    HOST_MANIFEST_DST="$TARGET_DIR/$HOST_NAME.json"
 
-cat > "$HOST_MANIFEST_DST" <<EOF
+    cat > "$HOST_MANIFEST_DST" <<EOF
 {
   "name": "$HOST_NAME",
   "description": "Native messaging host for MS OTP Automator",
@@ -72,8 +80,9 @@ cat > "$HOST_MANIFEST_DST" <<EOF
 }
 EOF
 
-echo "Native messaging host installed for $BROWSER:"
-echo "  Manifest: $HOST_MANIFEST_DST"
+    echo "Native messaging host installed for $BROWSER:"
+    echo "  Manifest: $HOST_MANIFEST_DST"
+done
 echo "  Script:   $HOST_PY"
 echo ""
 
